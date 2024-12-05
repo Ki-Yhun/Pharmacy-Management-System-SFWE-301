@@ -25,10 +25,13 @@ public class Main {
                 inventory.sort(Comparator.comparing(Drug::getExpirationDateAsLocalDate));
                 System.out.println("\nCurrent Inventory (sorted by expiration date):");
                 for (Drug item : inventory) {
-                    System.out.printf(
-                            "Name: %s, \n\tQty: %d, \n\tExpiration Date: %s, \n\tPrice: $%.2f, \n\tCategory: %s, \n\tLocation: %s%n\n",
-                            item.getName(), item.getQty(), item.getExpirationDate(),
-                            item.getPrice(), item.getCategoryLabel(), item.getLocation());
+                    System.out.println("Name: " + item.getName());
+                    System.out.println("Quantity: " + item.getQty());
+                    System.out.println("Expiration Date: " + item.getExpirationDate());
+                    System.out.println("Price: $" + String.format("%.2f", item.getPrice()));
+                    System.out.println("Category: " + item.getCategoryLabel());
+                    System.out.println("Location: " + item.getLocation());
+                    System.out.println(); // Add an empty line between inventory items
                 }
 
                 // Provide options to the user
@@ -53,7 +56,7 @@ public class Main {
                             Drug drugToUpdate = findDrug(inventory, medicineName);
 
                             if (drugToUpdate == null) {
-                                System.out.println("Medicine not found!");
+                                System.out.println("Medicine not found.");
                             } else {
                                 System.out.print("Enter the quantity to add: ");
                                 int quantityToAdd = scanner.nextInt();
@@ -78,14 +81,21 @@ public class Main {
                             } else {
                                 System.out.print("Enter the quantity to remove: ");
                                 int quantityToRemove = scanner.nextInt();
-                                scanner.nextLine(); // Consume the newline
+                                if(quantityToRemove <= 0){
+                                    System.out.println("Invalid quantity entered");
+                                }
+                                else if(quantityToRemove > drugToUpdate.getQty()){
+                                    System.out.println("Not Enough Stock to remove");
+                                }
+                                else{
+                                    scanner.nextLine(); // Consume the newline
+                                    System.out.print("Enter the reason for the change: ");
+                                    String reason = scanner.nextLine();
 
-                                System.out.print("Enter the reason for the change: ");
-                                String reason = scanner.nextLine();
-
-                                drugToUpdate.reduceQuantity(quantityToRemove, reason);
-                                InventoryCSVHandler.writeToCSV(inventory, fileName);
-                                System.out.println("Inventory updated successfully!");
+                                    drugToUpdate.reduceQuantity(quantityToRemove, reason);
+                                    InventoryCSVHandler.writeToCSV(inventory, fileName);
+                                    System.out.println("Inventory updated successfully!");
+                                }
                             }
                         }
                         case 3 -> {
@@ -98,7 +108,7 @@ public class Main {
                                 InventoryCSVHandler.writeToCSV(inventory, fileName);
                                 System.out.println("Medicine removed successfully!");
                             } else {
-                                System.out.println("Medicine not found!");
+                                System.out.println("Medicine not found.");
                             }
                         }
                         case 4 -> {
@@ -106,56 +116,103 @@ public class Main {
                             System.out.print("Enter the name of the new medicine: ");
                             String name = scanner.nextLine();
 
-                            System.out.print("Enter the quantity (No Units): ");
-                            int qty = scanner.nextInt();
-                            scanner.nextLine(); // Consume the newline
+                            // Check if the medicine already exists
+                            if (inventory.stream().anyMatch(drug -> drug.getName().equalsIgnoreCase(name))) {
+                                System.out.println("Medicine already exists.");
+                            }
+                            else {
+                                System.out.print("Enter the quantity (No Units): ");
+                                int qty = scanner.nextInt();
+                                scanner.nextLine(); // Consume the newline
 
-                            System.out.print("Enter the location: ");
-                            String location = scanner.nextLine();
+                                if (qty < 0) {
+                                    System.out.println("Invalid data entered: Quantity cannot be negative.");
+                                }
+                                else {
+                                    System.out.print("Enter the location: ");
+                                    String location = scanner.nextLine();
 
-                            System.out.print("Enter the price: $");
-                            double price = scanner.nextDouble();
-                            scanner.nextLine(); // Consume the newline
-
-                            System.out.print("Enter the expiration date (MM-DD-YYYY): ");
-                            String expirationDate = scanner.nextLine();
-
-                            System.out.print(
-                                    "Enter the category (1: Prescription Drug, 2: Non-Prescription Drug, 3: Non-Drug Item): ");
-                            int category = scanner.nextInt();
-                            scanner.nextLine(); // Consume the newline
-
-                            Drug newDrug = new Drug(name, qty, qty / 80.0, "Newly added medicine",
-                                    expirationDate, category, "", price, "", location);
-                            inventory.add(newDrug);
-                            InventoryCSVHandler.writeToCSV(inventory, fileName);
-                            System.out.println("New medicine added successfully!");
-                        }
-                        case 5 -> {
-                            System.out.print("Enter the name of the medicine to order: ");
-                            String medicineName = scanner.nextLine();
-                            Drug drugToUpdate = findDrug(inventory, medicineName);
-                            if (drugToUpdate == null) {
-                                System.out.println("Medicine not found!");
-                            } else {
-                                System.out.println("Current Quantity: " + drugToUpdate.getQty());
-                                if (drugToUpdate.getQty() > 120) {
-                                    System.out.println("Can't order more! Minimum quantity to order more is 120.");
-                                } else {
-                                    System.out.print("Enter the quantity to order: ");
-                                    int quantityToOrder = scanner.nextInt();
+                                    System.out.print("Enter the price: $");
+                                    double price = scanner.nextDouble();
                                     scanner.nextLine(); // Consume the newline
-                                    System.out.print("Enter the reason for the order: ");
-                                    String reason = scanner.nextLine();
 
-                                    drugToUpdate.updateQuantity(quantityToOrder, reason);
+                                    System.out.print("Enter the expiration date (MM-DD-YYYY): ");
+                                    String expirationDate = scanner.nextLine();
+
+                                    System.out.print(
+                                            "Enter the category (1: Prescription Drug, 2: Non-Prescription Drug, 3: Non-Drug Item): ");
+                                    int category = scanner.nextInt();
+                                    scanner.nextLine(); // Consume the newline
+
+                                    Drug newDrug = new Drug(name, qty, qty / 80.0, "Newly added medicine",
+                                            expirationDate, category, "", price, "", location);
+                                    inventory.add(newDrug);
                                     InventoryCSVHandler.writeToCSV(inventory, fileName);
-                                    InventoryCSVHandler.writeToCSV(drugToUpdate, quantityToOrder, orderFileName);
-                                    System.out.println("Inventory updated successfully!");
+                                    System.out.println("New medicine added successfully!");
                                 }
                             }
                         }
-                        case 6 -> exit = true;
+                        case 5 -> {
+                            System.out.print("Enter the name of the medicine to fill the prescription: ");
+                            String medicineName = scanner.nextLine();
+
+                            // Find the medicine in the inventory
+                            Drug drugToFill = inventory.stream()
+                                    .filter(drug -> drug.getName().equalsIgnoreCase(medicineName))
+                                    .findFirst()
+                                    .orElse(null);
+
+                            if (drugToFill == null) {
+                                // Medicine does not exist
+                                System.out.println("Medicine not found.");
+                            } else {
+                                System.out.print("Enter the quantity to fill: ");
+                                int quantityToFill = scanner.nextInt();
+                                scanner.nextLine(); // Consume the newline
+
+                                if (quantityToFill > drugToFill.getQty()) {
+                                    // Requested quantity exceeds stock
+                                    System.out.println("Not enough stock to fill.");
+                                } else {
+                                    // Fill the prescription
+                                    drugToFill.reduceQuantity(quantityToFill, "Prescription filled");
+                                    InventoryCSVHandler.writeToCSV(inventory, fileName);
+                                    System.out.printf("Prescription filled for %s. Remaining stock: %d%n",
+                                            medicineName, drugToFill.getQty());
+                                }
+                            }
+                        }
+                        case 6 -> { // Assuming case 6 is for ordering medicine
+                            System.out.print("Enter the name of the medicine to order: ");
+                            String medicineName = scanner.nextLine();
+
+                            // Find the medicine in the inventory
+                            Drug drugToOrder = inventory.stream()
+                                    .filter(drug -> drug.getName().equalsIgnoreCase(medicineName))
+                                    .findFirst()
+                                    .orElse(null);
+
+                            if (drugToOrder == null) {
+                                // Medicine does not exist
+                                System.out.println("Medicine not found.");
+                            } else {
+                                System.out.print("Enter the quantity to order: ");
+                                int quantityToOrder = scanner.nextInt();
+                                scanner.nextLine(); // Consume the newline
+
+                                if (quantityToOrder < 0) {
+                                    // Invalid quantity entered
+                                    System.out.println("Invalid quantity entered.");
+                                } else {
+                                    // Process the order
+                                    drugToOrder.updateQuantity(quantityToOrder, "Medicine ordered");
+                                    InventoryCSVHandler.writeToCSV(inventory, fileName);
+                                    System.out.printf("Order placed for %s. Updated stock: %d%n",
+                                            medicineName, drugToOrder.getQty());
+                                }
+                            }
+                        }
+                        case 7 -> exit = true;
                         default -> System.out.println("Choose one of the options.");
                     }
                 } catch (InputMismatchException e) {

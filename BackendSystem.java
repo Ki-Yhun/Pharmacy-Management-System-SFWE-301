@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import jdk.jshell.UnresolvedReferenceException;
 
 public class BackendSystem {
     final static HashMap map = new HashMap<>();
@@ -17,8 +19,8 @@ public class BackendSystem {
     private String patientFilePath = "patientData.csv";
     private File file = new File(filepath);
     private File patientFiles = new File(patientFilePath);
-    private String[] headers = {"Timestamp", "Username", "Action"};
-    private String[] patientHeaders = {"Username", "Prescription(s)"};
+    private String[] headers = {"Timestamp", " Username", " Action"};
+    private String[] patientHeaders = {"Username", " Rx ID", " Prescription", "Current Quantity", " Max Quantity", " Records"};
     private boolean fileExists = file.exists();
     private boolean patientFileExists = file.exists();
 
@@ -28,7 +30,7 @@ public class BackendSystem {
         
         try (FileWriter writer = new FileWriter(filepath, true)) {
             if(!fileExists) {
-                writer.write(String.join(",", headers) + "\n");
+                writer.write(String.join(", ", headers) + "\n");
             }
         }  
         catch (IOException e) {
@@ -37,7 +39,7 @@ public class BackendSystem {
 
         try (FileWriter writer = new FileWriter(patientFilePath, true)) {
             if(!fileExists) {
-                writer.write(String.join(",", patientHeaders) + "\n");
+                writer.write(String.join(", ", patientHeaders) + "\n");
             }
         }  
         catch (IOException e) {
@@ -149,29 +151,91 @@ public class BackendSystem {
         return false;
     }
 
-    public String[] readAccountInfo(String username) {
+    public String readAccountInfo(String username) {
         if (loggedIn) {
             return ((Account)map.get(username)).displayRecords();
         }
         return null;
     }
 
-    private void writeToPatientData(String username, Prescription prescription) {
+    private boolean writeToPatientData(String username, Prescription prescription) {
         try (FileWriter writer = new FileWriter(patientFilePath, true)) {             
-            writer.write(username + ", " + prescription.getName() + ", " + prescription.getQuantity() + "\n");
+            writer.write(username + ", " + prescription.getID() + ", " + prescription.getName() + ", " + prescription.getQuantity() + ", " + prescription.getMaxQuantity() + ", " + ((Account)map.get(username)).displayRecords() + "\n");
         }
         catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
+            return false;
         }
+        return true;
     }
 
     public boolean createPrescription(String userName, String medicineName, int quantity, int ID, String expirationDate, String patientName, String pharmacistName, String description){
         Account user = (Account)map.get(currentUser);
         if((user.getJobRole() == Account.Roles.PharmacistManager || user.getJobRole() == Account.Roles.Pharmacist) && loggedIn){
+            if (!isInStock(medicineName)){return false;}
+
+            Account patient = (Account)map.get(patientName);
             Prescription newRx = new Prescription(medicineName, quantity, ID, expirationDate, patientName, pharmacistName, description);
-            writeToPatientData(userName, newRx);
+            patient.setPrescription(newRx);
+            writeToPatientData(patientName, newRx);
+            writeToLog(userName, "created Prescription");
             return true;
         }
         return false;
     }
+
+    public boolean fillPrescription(String patientName, int quantity){
+        Account user = (Account)map.get(currentUser);
+        if((user.getJobRole() == Account.Roles.PharmacistManager || user.getJobRole() == Account.Roles.Pharmacist) && loggedIn){
+            Account patient = (Account)map.get(patientName);
+            Prescription Rx = patient.getPrescription();
+
+            if(Rx.fill(quantity)){
+                clearPatientData();
+                writeToPatientData(patientName, Rx);
+                writeToLog(currentUser, "filled Prescription");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void clearPatientData(){
+
+        try (FileWriter writer = new FileWriter(patientFilePath)) {
+            if(!fileExists) {
+                writer.write("");
+            }
+        }  
+        catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        try (FileWriter writer = new FileWriter(patientFilePath, true)) {
+                writer.write(String.join(",", patientHeaders) + "\n");
+        }  
+        catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public boolean isInStock(String medicineName){
+        String fileName = "inventory.csv";
+        try{
+            List<Drug> inventory = InventoryCSVHandler.readFromCSV(fileName);
+            Drug drugToUpdate = Main.findDrug(inventory, medicineName);
+
+            if(drugToUpdate == null){
+                return false;
+            }
+        }
+        catch (IOException e) {
+            System.err.println("Error handling CSV file: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    
 }

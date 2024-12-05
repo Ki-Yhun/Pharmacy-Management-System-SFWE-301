@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import javax.swing.plaf.ActionMapUIResource;
 
 public class BESTest {
     
@@ -7,7 +8,7 @@ public class BESTest {
         BackendSystem sys = new BackendSystem();
         int i;
 
-        System.out.println("\n\n");
+        System.out.println("\n");
         //Testcase 1.1: Authentication / Access Log Storage
 
             // Login with Default Admin
@@ -115,7 +116,7 @@ public class BESTest {
             
             sys.Login("Steve", "123456789");
             sys.editAccountInfo("Hannibal Barca", info);
-            if(sys.readAccountInfo("Hannibal Barca").equals(info)) {
+            if(sys.readAccountInfo("Hannibal Barca").equals(String.join(", ", info))) {
                 System.out.println("Test 1.5.1 Failed: Non pharmacist manager account modified employee data");
                 return;
             }
@@ -123,7 +124,7 @@ public class BESTest {
             sys.Login("DefaultUser", "Pickles#4");
             sys.editAccountInfo("Hannibal Barca", info);
             
-            if(!sys.readAccountInfo("Hannibal Barca").equals(info)) {
+            if(!sys.readAccountInfo("Hannibal Barca").equals(String.join(", ", info))) {
                 System.out.println("Test 1.5.2 Failed: Pharmacist manager could not modfity employee data");
                 return;
             }
@@ -148,11 +149,53 @@ public class BESTest {
             }
 
         //Successfully completed all testcases
+        sys.Logout();
         System.out.println("Test 1: All testcases successfully passed");
-    }
 
-    //Testcase 2.1: Prescription Creation
+        //Clear any data in patientData for testing
+        sys.clearPatientData();
 
-    //Testcase 2.2: Prescription Data added to patientData
+        //Testcase 2.1: Prescription Creation and Prescriptions Added to Patient Data csv
+        String[] info1 = {"Name: John Smith ", "Birthdate: October 12 1992", "Email: JSmith@website.com", "Phone Number: N/A", 
+            "Medical Conditions: Trouble breathing during workouts, low VO2 max", 
+            "Presriptions: Albuterol", "Doctor: Mike Rogers", "Patient History: No previous visits", "Licenses and Certifications: N/A", "License Status: N/A"};
+
+        String[] info2 = {"Name: Adam Sandler ", "Birthdate: May 27 2004", "Email: JSmith@website.com", "Phone Number: N/A", 
+            "Medical Conditions: Trouble breathing during workouts, low VO2 max", 
+            "Presriptions: Albuterol", "Doctor: Mike Rogers", "Patient History: No previous visits", "Licenses and Certifications: N/A", "License Status: N/A"};
+
+        sys.Login("DefaultUser", "Pickles#4"); 
         
-}
+        sys.createAccount(Account.Roles.Patient, "John Smith", "123456789");
+        sys.editAccountInfo("John Smith", info1);
+        if(!sys.createPrescription("DefaultUser", "Albuterol", 2, 9835, "12-05-2024", "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
+            System.out.println("Test 2.1.1 Failed: Did not create a new prescription");
+            return;
+        }
+
+        //Testcase 2.1.2 Prescriptions not in inventory will not be created
+        sys.createAccount(Account.Roles.Patient, "Adam Sandler", "123456789");
+        sys.editAccountInfo("Adam Sandler", info2);
+        if(sys.createPrescription("DefaultUser", "Flonase", 50, 829, "12-05-2024", "Adam Sandler", "Albert Einstein", "Take 1-2 pills every 24 hours, if needed, for allergies.")){
+            System.out.println("Test 2.1.2 Failed: Created new prescription when medicine is not available");
+            return;
+        }
+
+        //Testcase 2.2: Prescription fill / Authentication check
+        if(!sys.fillPrescription("John Smith", 2)){
+            System.out.println("Test 2.2.1 Failed: Did not fill prescription");
+            return;
+        }
+
+        //Testcase 2.3 Non-Authenticated users shall not create prescriptions
+        sys.Login("John Smith", "123456789");
+        if(sys.createPrescription("DefaultUser", "Acetaminophen", 100, 8370, "12-05-2024", "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
+            System.out.println("Test 2.3.1 Failed: Created a new prescription");
+            return;
+        }
+
+
+        sys.Logout();
+        System.out.println("Test 2: All testcases successfully passed");
+    } //Main Bracket
+} // Class Bracket

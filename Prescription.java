@@ -1,44 +1,41 @@
 import java.io.*;
+import java.time.LocalDate;
 import java.util.*;
 
 public class Prescription {
 
     private String medicineName, patientName, pharmacistName;
-    private int quantity = 0, ID;
+    private int quantity = 0, maxQuantity = 0, ID;
     private String expirationDate, description;
      
-    public Prescription(String medicineName, int quantity, int ID, String expirationDate, String patientName, String pharmacistName, String description) {
+    public Prescription(String medicineName, int maxQuantity, int ID, String expirationDate, String patientName, String pharmacistName, String description) {
         this.medicineName = medicineName;
         this.patientName = patientName;
         this.pharmacistName = pharmacistName;
-        this.quantity = quantity;
+        this.maxQuantity = maxQuantity;
         this.ID = ID;
         this.expirationDate = expirationDate;
         this.description = description;
     }
 
-    public void fill(int quantity){
-        this.quantity += quantity;
+    public boolean fill(int quantity){
+        this.quantity = quantity;
         String fileName = "inventory.csv";
 
         try{
             List<Drug> inventory = InventoryCSVHandler.readFromCSV(fileName);
             Drug drugToUpdate = Main.findDrug(inventory, medicineName);
+            drugToUpdate.reduceQuantity(quantity, "Prescription Fill");
+            InventoryCSVHandler.writeToCSV(inventory, fileName);
+            if(quantity != maxQuantity){return false;}
+            return true;
 
-            if(drugToUpdate == null){
-                System.out.println("Medicine not found!");
-            }
-            else{
-                drugToUpdate.reduceQuantity(quantity, "Prescription Fill");
-                InventoryCSVHandler.writeToCSV(inventory, fileName);
-            } 
         }
         catch (IOException e) {
             System.err.println("Error handling CSV file: " + e.getMessage());
             e.printStackTrace();
         }
-        
-        
+        return false;
     }
 
     public String getName(){
@@ -47,5 +44,13 @@ public class Prescription {
 
     public int getQuantity(){
         return this.quantity;
+    }
+
+    public int getMaxQuantity(){
+        return this.maxQuantity;
+    }
+
+    public int getID(){
+        return this.ID;
     }
 }

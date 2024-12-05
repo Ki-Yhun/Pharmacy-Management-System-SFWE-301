@@ -10,6 +10,7 @@ public class Account {
     private String password = null;
     private LocalDate passwordExpire = null;
     private int failedAttempts = 0; 
+    private Prescription prescription;
 
     private String[] records = {"Name: ", "Birthdate: ", "Email: ", "Phone Number: ", "Medical Conditions: N/A", 
     "Presriptions", "Doctor: N/A", "Patient History: N/A", "Licenses and Certifications: N/A", "License Status: N/A"}; 
@@ -60,8 +61,9 @@ public class Account {
         failedAttempts++;
     }
 
-    public String[] displayRecords() {
-        return records;
+    public String displayRecords() {
+        String str = String.join(", ", records);
+        return str;
     }
 
     public void updateRecords(String[] records) {
@@ -71,5 +73,13 @@ public class Account {
     //used for testing checkpassword 
     public void updatePasswordExpire(LocalDate newDate) {
         this.passwordExpire = newDate;
+    }
+
+    public Prescription getPrescription(){
+        return this.prescription;
+    }
+
+    public void setPrescription(Prescription Rx){
+        this.prescription = Rx;
     }
 }
