@@ -38,6 +38,10 @@ public class Prescription {
         return false;
     }
 
+    public LocalDate getExpirationDate(){
+        return this.expirationDate;
+    }
+
     public String getName(){
         return this.medicineName;
     }

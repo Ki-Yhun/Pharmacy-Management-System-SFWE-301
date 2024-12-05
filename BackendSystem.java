@@ -190,9 +190,13 @@ public class BackendSystem {
 
     public boolean fillPrescription(String patientName, int quantity){
         Account user = (Account)map.get(currentUser);
+
         if((user.getJobRole() == Account.Roles.PharmacistManager || user.getJobRole() == Account.Roles.Pharmacist) && loggedIn){
             Account patient = (Account)map.get(patientName);
             Prescription Rx = patient.getPrescription();
+            if(Rx.getExpirationDate().isBefore(LocalDate.now())){
+                return false;
+            }
 
             if(Rx.fill(quantity)){
                 clearPatientData();

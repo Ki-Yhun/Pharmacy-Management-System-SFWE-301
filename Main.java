@@ -236,7 +236,7 @@ public class Main {
         }
     }
 
-    private static Drug findDrug(List<Drug> inventory, String name) {
+    public static Drug findDrug(List<Drug> inventory, String name) {
         return inventory.stream()
                 .filter(drug -> drug.getName().equalsIgnoreCase(name))
                 .findFirst()
