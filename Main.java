@@ -81,13 +81,11 @@ class InventoryCSVHandler {
 
 }
 
-import java.io.*;
-import java.util.*;
-import java.time.LocalDate;
 
 public class Main {
     public static void main(String[] args) {
         String fileName = "inventory.csv";
+        String orderFileName = "orders.csv";
 
         try {
             // Check if the file exists
@@ -280,4 +278,3 @@ public class Main {
                 .orElse(null);
     }
 }
-
