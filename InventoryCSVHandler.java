@@ -21,6 +21,7 @@ public class InventoryCSVHandler {
         }
     }
 
+    //write to the orders.csv
     public static void writeToCSV(Drug drugToUpdate, int quantityToOrder, String fileName) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
             // Write header
@@ -33,7 +34,7 @@ public class InventoryCSVHandler {
             // Generate a random number between 10000 and 99999 (inclusive)
             int orderID = random.nextInt(90000) + 10000;
 
-            String orderLine = String.format("%s,\n\t%s,\n\t%d,\n\t%d,\n\t%s",
+            String orderLine = String.format("%s,%s,%d,%d,%s",
                     time.toString(),
                     drugToUpdate.getName(),
                     quantityToOrder,
