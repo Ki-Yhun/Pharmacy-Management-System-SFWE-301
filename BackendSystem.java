@@ -1,6 +1,3 @@
-package PharmMgmtSys;
-
-import PharmMgmtSys.Account.Roles;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -10,24 +7,37 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class BackendSystem {
-    private static HashMap map = new HashMap<>();
+    final static HashMap map = new HashMap<>();
 
     public static String currentUser = "Null"; 
     public static boolean loggedIn = false;
 
     //Admin logging 
     private String filepath = "log.csv";
+    private String patientFilePath = "patientData.csv";
     private File file = new File(filepath);
+    private File patientFiles = new File(patientFilePath);
     private String[] headers = {"Timestamp", "Username", "Action"};
+    private String[] patientHeaders = {"Username", "Prescription(s)"};
     private boolean fileExists = file.exists();
+    private boolean patientFileExists = file.exists();
 
     BackendSystem() {
-        Account defaultUser = new Account(Roles.PharmacistManager, "Pickles#4");
+        Account defaultUser = new Account(Account.Roles.PharmacistManager, "Pickles#4");
         map.put("DefaultUser", defaultUser);
         
         try (FileWriter writer = new FileWriter(filepath, true)) {
             if(!fileExists) {
                 writer.write(String.join(",", headers) + "\n");
+            }
+        }  
+        catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        try (FileWriter writer = new FileWriter(patientFilePath, true)) {
+            if(!fileExists) {
+                writer.write(String.join(",", patientHeaders) + "\n");
             }
         }  
         catch (IOException e) {
@@ -66,9 +76,9 @@ public class BackendSystem {
         return false;
     }
 
-    public boolean createAccount(Roles role, String username, String password) {
+    public boolean createAccount(Account.Roles role, String username, String password) {
         Account user = (Account)map.get(currentUser);
-        if (user.getJobRole() == Roles.PharmacistManager && loggedIn) {
+        if (user.getJobRole() == Account.Roles.PharmacistManager && loggedIn) {
             Account newUser = new Account(role, password);
             if (map.get(username) == null) {
                 map.put(username, newUser);
@@ -92,7 +102,7 @@ public class BackendSystem {
 
     public boolean deleteAccount(String username) {
         Account user = (Account)map.get(currentUser);
-        if (user.getJobRole() == Roles.PharmacistManager && loggedIn && username != currentUser) {
+        if (user.getJobRole() == Account.Roles.PharmacistManager && loggedIn && username != currentUser) {
             map.remove(username);
             return true;
         }
@@ -101,7 +111,7 @@ public class BackendSystem {
 
     public boolean unlockAccount(String username) {
         Account user = (Account)map.get(currentUser);
-        if(user.getJobRole() == Roles.PharmacistManager && loggedIn) {
+        if(user.getJobRole() == Account.Roles.PharmacistManager && loggedIn) {
             if ((Account)map.get(username) != null) {
                 ((Account)map.get(username)).resetLockOut();
                 return true;
@@ -123,7 +133,7 @@ public class BackendSystem {
 
     public void updatePasswordExpire(String username, LocalDate amount) {
         Account user = (Account)map.get(currentUser);
-        if (user.getJobRole() == Roles.PharmacistManager && loggedIn && map.get(username) != null) {
+        if (user.getJobRole() == Account.Roles.PharmacistManager && loggedIn && map.get(username) != null) {
             ((Account)map.get(username)).updatePasswordExpire(amount);
         }
     }
@@ -144,5 +154,24 @@ public class BackendSystem {
             return ((Account)map.get(username)).displayRecords();
         }
         return null;
+    }
+
+    private void writeToPatientData(String username, Prescription prescription) {
+        try (FileWriter writer = new FileWriter(patientFilePath, true)) {             
+            writer.write(username + ", " + prescription.getName() + ", " + prescription.getQuantity() + "\n");
+        }
+        catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    public boolean createPrescription(String userName, String medicineName, int quantity, int ID, String expirationDate, String patientName, String pharmacistName, String description){
+        Account user = (Account)map.get(currentUser);
+        if((user.getJobRole() == Account.Roles.PharmacistManager || user.getJobRole() == Account.Roles.Pharmacist) && loggedIn){
+            Prescription newRx = new Prescription(medicineName, quantity, ID, expirationDate, patientName, pharmacistName, description);
+            writeToPatientData(userName, newRx);
+            return true;
+        }
+        return false;
     }
 }

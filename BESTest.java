@@ -1,6 +1,3 @@
-package PharmMgmtSys;
-
-import PharmMgmtSys.Account.Roles;
 import java.time.LocalDate;
 
 public class BESTest {
@@ -26,7 +23,7 @@ public class BESTest {
                 System.out.println("Test 1.1.3 Failed: could not login with DefaultUser");
                 return;
             }
-        
+            
         //Testcase 1.2: Create Accounts, Account Types, Employee Account 
             
             //Create another account
@@ -36,7 +33,7 @@ public class BESTest {
             sys.Login("Hannibal Barca", "AlpineElephants");
 
             //check if cashier can create employee account
-            if (sys.createAccount(Roles.PharmacistTech, "Carthagian Hegemony", "2ndPunicWar")) {
+            if (sys.createAccount(Account.Roles.PharmacistTech, "Carthagian Hegemony", "2ndPunicWar")) {
                 System.out.println("Test 1.2.2 Failed: Non-Pharmacist Manager successfully created account");
                 //sys.Login("Carthagian Hegemony", password)
                 return;
@@ -153,5 +150,9 @@ public class BESTest {
         //Successfully completed all testcases
         System.out.println("Test 1: All testcases successfully passed");
     }
+
+    //Testcase 2.1: Prescription Creation
+
+    //Testcase 2.2: Prescription Data added to patientData
         
 }

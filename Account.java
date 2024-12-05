@@ -1,5 +1,3 @@
-package PharmMgmtSys;
-
 import java.time.LocalDate;
 
 public class Account {
@@ -17,14 +15,14 @@ public class Account {
     "Presriptions", "Doctor: N/A", "Patient History: N/A", "Licenses and Certifications: N/A", "License Status: N/A"}; 
 
     Account() {
-        int ID = nextID;
+        ID = nextID;
         nextID++; 
         jobRoles = Roles.Patient;
 
     }
 
     Account(Roles role, String password) {
-        int ID = nextID;
+        ID = nextID;
         nextID++; 
         jobRoles = role; 
  
