@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 
+
 public class Main {
     public static void main(String[] args) {
         String fileName = "inventory.csv";
@@ -21,8 +22,10 @@ public class Main {
             boolean exit = false;
 
             while (!exit) {
-                // Display Inventory
+                // Sort inventory by expiration date (soonest first)
                 inventory.sort(Comparator.comparing(Drug::getExpirationDateAsLocalDate));
+
+                // Display Inventory
                 System.out.println("\nCurrent Inventory (sorted by expiration date):");
                 for (Drug item : inventory) {
                     System.out.println("Name: " + item.getName());
@@ -40,8 +43,9 @@ public class Main {
                 System.out.println("2. Remove Quantity from a Medicine");
                 System.out.println("3. Remove a Medicine Completely");
                 System.out.println("4. Add New Medicine");
-                System.out.println("5. Order New Medicine");
-                System.out.println("6. Exit");
+                System.out.println("5. Fill Prescription");
+                System.out.println("6. Order More Stock");
+                System.out.println("7. Exit");
                 System.out.print("Choose an option: ");
 
                 try {
@@ -50,7 +54,6 @@ public class Main {
 
                     switch (choice) {
                         case 1 -> {
-                            // Add Quantity
                             System.out.print("Enter the name of the medicine to update: ");
                             String medicineName = scanner.nextLine();
                             Drug drugToUpdate = findDrug(inventory, medicineName);
@@ -71,18 +74,18 @@ public class Main {
                             }
                         }
                         case 2 -> {
-                            // Remove Quantity
                             System.out.print("Enter the name of the medicine to update: ");
                             String medicineName = scanner.nextLine();
                             Drug drugToUpdate = findDrug(inventory, medicineName);
 
                             if (drugToUpdate == null) {
-                                System.out.println("Medicine not found!");
+                                System.out.println("Medicine cannot be found!");
                             } else {
                                 System.out.print("Enter the quantity to remove: ");
                                 int quantityToRemove = scanner.nextInt();
                                 if(quantityToRemove <= 0){
                                     System.out.println("Invalid quantity entered");
+
                                 }
                                 else if(quantityToRemove > drugToUpdate.getQty()){
                                     System.out.println("Not Enough Stock to remove");
@@ -99,7 +102,6 @@ public class Main {
                             }
                         }
                         case 3 -> {
-                            // Remove Medicine
                             System.out.print("Enter the name of the medicine to remove completely: ");
                             String medicineName = scanner.nextLine();
                             boolean removed = inventory.removeIf(drug -> drug.getName().equalsIgnoreCase(medicineName));
@@ -111,6 +113,7 @@ public class Main {
                                 System.out.println("Medicine not found.");
                             }
                         }
+
                         case 4 -> {
                             // Add New Medicine
                             System.out.print("Enter the name of the new medicine: ");
@@ -182,6 +185,7 @@ public class Main {
                                 }
                             }
                         }
+
                         case 6 -> { // Assuming case 6 is for ordering medicine
                             System.out.print("Enter the name of the medicine to order: ");
                             String medicineName = scanner.nextLine();
@@ -200,6 +204,7 @@ public class Main {
                                 int quantityToOrder = scanner.nextInt();
                                 scanner.nextLine(); // Consume the newline
 
+
                                 if (quantityToOrder < 0) {
                                     // Invalid quantity entered
                                     System.out.println("Invalid quantity entered.");
@@ -212,6 +217,8 @@ public class Main {
                                 }
                             }
                         }
+
+
                         case 7 -> exit = true;
                         default -> System.out.println("Choose one of the options.");
                     }
