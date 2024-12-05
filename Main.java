@@ -81,10 +81,13 @@ class InventoryCSVHandler {
 
 }
 
+import java.io.*;
+import java.util.*;
+import java.time.LocalDate;
+
 public class Main {
     public static void main(String[] args) {
         String fileName = "inventory.csv";
-        String orderFileName = "orders.csv";
 
         try {
             // Check if the file exists
@@ -101,12 +104,13 @@ public class Main {
             boolean exit = false;
 
             while (!exit) {
-                // Display Inventory
+                // Sort inventory by expiration date (soonest first)
                 inventory.sort(Comparator.comparing(Drug::getExpirationDateAsLocalDate));
+
+                // Display Inventory
                 System.out.println("\nCurrent Inventory (sorted by expiration date):");
                 for (Drug item : inventory) {
-                    System.out.printf(
-                            "Name: %s, \n\tQty: %d, \n\tExpiration Date: %s, \n\tPrice: $%.2f, \n\tCategory: %s, \n\tLocation: %s%n\n",
+                    System.out.printf("Name: %s, Qty: %d, Expiration Date: %s, Price: $%.2f, Category: %s, Location: %s%n",
                             item.getName(), item.getQty(), item.getExpirationDate(),
                             item.getPrice(), item.getCategoryLabel(), item.getLocation());
                 }
@@ -117,8 +121,9 @@ public class Main {
                 System.out.println("2. Remove Quantity from a Medicine");
                 System.out.println("3. Remove a Medicine Completely");
                 System.out.println("4. Add New Medicine");
-                System.out.println("5. Order New Medicine");
-                System.out.println("6. Exit");
+                System.out.println("5. Fill Prescription");
+                System.out.println("6. Order More Stock");
+                System.out.println("7. Exit");
                 System.out.print("Choose an option: ");
 
                 try {
@@ -127,7 +132,6 @@ public class Main {
 
                     switch (choice) {
                         case 1 -> {
-                            // Add Quantity
                             System.out.print("Enter the name of the medicine to update: ");
                             String medicineName = scanner.nextLine();
                             Drug drugToUpdate = findDrug(inventory, medicineName);
@@ -148,7 +152,6 @@ public class Main {
                             }
                         }
                         case 2 -> {
-                            // Remove Quantity
                             System.out.print("Enter the name of the medicine to update: ");
                             String medicineName = scanner.nextLine();
                             Drug drugToUpdate = findDrug(inventory, medicineName);
@@ -169,7 +172,6 @@ public class Main {
                             }
                         }
                         case 3 -> {
-                            // Remove Medicine
                             System.out.print("Enter the name of the medicine to remove completely: ");
                             String medicineName = scanner.nextLine();
                             boolean removed = inventory.removeIf(drug -> drug.getName().equalsIgnoreCase(medicineName));
@@ -182,7 +184,6 @@ public class Main {
                             }
                         }
                         case 4 -> {
-                            // Add New Medicine
                             System.out.print("Enter the name of the new medicine: ");
                             String name = scanner.nextLine();
 
@@ -200,8 +201,7 @@ public class Main {
                             System.out.print("Enter the expiration date (MM-dd-yyyy): ");
                             String expirationDate = scanner.nextLine();
 
-                            System.out.print(
-                                    "Enter the category (1: Prescription Drug, 2: Non-Prescription Drug, 3: Non-Drug Item): ");
+                            System.out.print("Enter the category (1: Prescription Drug, 2: Non-Prescription Drug, 3: Non-Drug Item): ");
                             int category = scanner.nextInt();
                             scanner.nextLine(); // Consume the newline
 
@@ -212,6 +212,28 @@ public class Main {
                             System.out.println("New medicine added successfully!");
                         }
                         case 5 -> {
+                            // Fill Prescription
+                            System.out.print("Enter the name of the medicine to fill the prescription: ");
+                            String medicineName = scanner.nextLine();
+                            Drug drugToFill = findDrug(inventory, medicineName);
+
+                            if (drugToFill == null) {
+                                System.out.println("Medicine not found!");
+                            } else {
+                                System.out.print("Enter the quantity to fill: ");
+                                int quantityToFill = scanner.nextInt();
+                                scanner.nextLine(); // Consume the newline
+
+                                if (quantityToFill > drugToFill.getQty()) {
+                                    System.out.println("Error: Not enough stock to fill the prescription!");
+                                } else {
+                                    drugToFill.reduceQuantity(quantityToFill, "Prescription filled");
+                                    InventoryCSVHandler.writeToCSV(inventory, fileName);
+                                    System.out.println("Prescription filled.");
+                                }
+                            }
+                        }
+                        case 6 -> {
                             System.out.print("Enter the name of the medicine to order: ");
                             String medicineName = scanner.nextLine();
                             Drug drugToUpdate = findDrug(inventory, medicineName);
@@ -235,7 +257,7 @@ public class Main {
                                 }
                             }
                         }
-                        case 6 -> exit = true;
+                        case 7 -> exit = true;
                         default -> System.out.println("Choose one of the options.");
                     }
                 } catch (InputMismatchException e) {
@@ -258,3 +280,4 @@ public class Main {
                 .orElse(null);
     }
 }
+
