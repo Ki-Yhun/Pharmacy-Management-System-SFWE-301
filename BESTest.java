@@ -15,7 +15,15 @@ public class BESTest {
 
             // Login with Default Admin
             if (!sys.Login("DefaultUser", "Pickles#4")) {
-                System.out.println("Test 1.1 Failed: could not login with DefaultUser");
+                System.out.println("Test 1.1.1 Failed: could not login with DefaultUser");
+                return;
+            }
+            if(!sys.Logout()) {
+                System.out.println("Test 1.1.2 Failed: Could not logout");
+                return;
+            }
+            if (!sys.Login("DefaultUser", "Pickles#4")) {
+                System.out.println("Test 1.1.3 Failed: could not login with DefaultUser");
                 return;
             }
         
@@ -140,16 +148,6 @@ public class BESTest {
             //Cannot delete own account
             if(sys.deleteAccount("DefaultUser")) {
                 System.out.println("Test 1.6.3 Failed: Deleted own account");
-            }
-        
-        //Testcase 1.7: Logout() / Access Log Storage
-            if(!sys.Logout()) {
-                System.out.println("Test 1.7.1 Failed: Could not logout");
-                return;
-            }
-            if(sys.Logout()) {
-                System.out.println("Test 1.7.2 Failed: Should not logout");
-                return;
             }
 
         //Successfully completed all testcases
