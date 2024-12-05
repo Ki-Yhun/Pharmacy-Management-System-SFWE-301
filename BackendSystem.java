@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import jdk.jshell.UnresolvedReferenceException;
 
 public class BackendSystem {
     final static HashMap map = new HashMap<>();
@@ -169,8 +168,13 @@ public class BackendSystem {
         return true;
     }
 
-    public boolean createPrescription(String userName, String medicineName, int quantity, int ID, String expirationDate, String patientName, String pharmacistName, String description){
+    public boolean createPrescription(String userName, String medicineName, int quantity, int ID, LocalDate expirationDate, String patientName, String pharmacistName, String description){
         Account user = (Account)map.get(currentUser);
+
+        if(expirationDate.isBefore(LocalDate.now())){
+            return false;
+        }
+
         if((user.getJobRole() == Account.Roles.PharmacistManager || user.getJobRole() == Account.Roles.Pharmacist) && loggedIn){
             if (!isInStock(medicineName)){return false;}
 

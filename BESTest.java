@@ -1,5 +1,4 @@
 import java.time.LocalDate;
-import javax.swing.plaf.ActionMapUIResource;
 
 public class BESTest {
     
@@ -168,7 +167,7 @@ public class BESTest {
         
         sys.createAccount(Account.Roles.Patient, "John Smith", "123456789");
         sys.editAccountInfo("John Smith", info1);
-        if(!sys.createPrescription("DefaultUser", "Albuterol", 2, 9835, "12-05-2024", "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
+        if(!sys.createPrescription("DefaultUser", "Albuterol", 2, 9835, LocalDate.now().plusYears(1), "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
             System.out.println("Test 2.1.1 Failed: Did not create a new prescription");
             return;
         }
@@ -176,7 +175,7 @@ public class BESTest {
         //Testcase 2.1.2 Prescriptions not in inventory will not be created
         sys.createAccount(Account.Roles.Patient, "Adam Sandler", "123456789");
         sys.editAccountInfo("Adam Sandler", info2);
-        if(sys.createPrescription("DefaultUser", "Flonase", 50, 829, "12-05-2024", "Adam Sandler", "Albert Einstein", "Take 1-2 pills every 24 hours, if needed, for allergies.")){
+        if(sys.createPrescription("DefaultUser", "Flonase", 50, 829, LocalDate.now().plusYears(1), "Adam Sandler", "Albert Einstein", "Take 1-2 pills every 24 hours, if needed, for allergies.")){
             System.out.println("Test 2.1.2 Failed: Created new prescription when medicine is not available");
             return;
         }
@@ -189,7 +188,7 @@ public class BESTest {
 
         //Testcase 2.3 Non-Authenticated users shall not create prescriptions
         sys.Login("John Smith", "123456789");
-        if(sys.createPrescription("DefaultUser", "Acetaminophen", 100, 8370, "12-05-2024", "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
+        if(sys.createPrescription("DefaultUser", "Acetaminophen", 100, 8370, LocalDate.now().plusYears(1), "John Smith", "Albert Einstein", "Inhale 2 puffs every 4 hours, if needed, for wheezing, coughing, increased work, or difficulty breahting")){
             System.out.println("Test 2.3.1 Failed: Created a new prescription");
             return;
         }

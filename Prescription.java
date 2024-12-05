@@ -4,11 +4,11 @@ import java.util.*;
 
 public class Prescription {
 
-    private String medicineName, patientName, pharmacistName;
+    private String medicineName, patientName, pharmacistName, description;
     private int quantity = 0, maxQuantity = 0, ID;
-    private String expirationDate, description;
+    private LocalDate expirationDate;
      
-    public Prescription(String medicineName, int maxQuantity, int ID, String expirationDate, String patientName, String pharmacistName, String description) {
+    public Prescription(String medicineName, int maxQuantity, int ID, LocalDate expirationDate, String patientName, String pharmacistName, String description) {
         this.medicineName = medicineName;
         this.patientName = patientName;
         this.pharmacistName = pharmacistName;
