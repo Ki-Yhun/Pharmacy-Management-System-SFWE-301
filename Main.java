@@ -134,6 +134,7 @@ public class Main {
 
                                         System.out.print("Enter the price: ");
                                         double price = scanner.nextDouble();
+                                        price = Math.abs(price);
                                         scanner.nextLine(); // Consume the newline 
                                         System.out.print("Enter the expiration date (MM-dd-yyyy): ");
                                         String expirationDate = scanner.nextLine();
