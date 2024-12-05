@@ -1,4 +1,3 @@
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -14,6 +13,12 @@ class Drug {
     private double price;
     private String notes; // for low qty or expo coming up or physical error
     private String location;
+
+    public Drug() {
+        this.qty = 0;
+        this.num_boxes = 0;
+        this.price = 0;
+    }
 
     public Drug(String name, int qty, double num_boxes, String description, String expirationDate, int category, String catLab, double price, String notes, String location) {
         this.Name = name;
@@ -125,14 +130,19 @@ class Drug {
     }
 
     public void setCategoryLabel() {
-        if (this.category == 1) {
-            this.categoryLabel = "Prescription Drug";
-        } else if (this.category == 2) {
-            this.categoryLabel = "Non-Prescription Drug";
-        } else if (this.category == 3) {
-            this.categoryLabel = "Non-Drug Item";
-        } else {
-            this.categoryLabel = "";
+
+        switch(this.category) {
+            case 1:
+                this.categoryLabel = "Prescription Drug";
+                break;
+            case 2:
+                this.categoryLabel = "Non-Prescription Drug";
+                break;
+            case 3:
+                this.categoryLabel = "Non-Drug Item";
+                break;
+            default:
+                this.categoryLabel = "";
         }
     }
 
